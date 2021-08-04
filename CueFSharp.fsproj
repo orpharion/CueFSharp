@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>CueFSharp</RootNamespace>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- CUE -->
+    <Compile Include="Cue/Format.fs" />
+    <Compile Include="Cue/Token.fs" />
+    <Compile Include="Cue/Ast.fs" />
+
+    <!-- .NET -> CUE -->
+    <Compile Include="DotnetToCue/Util.fs" />
+
+    <!--     Basic types -->
+    <Compile Include="DotnetToCue/Ast.fs" />
+    <Compile Include="DotnetToCue/IRegister.fs" /> 
+    <Compile Include="DotnetToCue/Reference.fs" />
+    <Compile Include="DotnetToCue/Scalars.fs" />
+    <Compile Include="DotnetToCue/Vectors.fs" />
+
+    <!--     Complex types -->
+    <Compile Include="DotnetToCue/Fields.fs" />
+    <Compile Include="DotnetToCue/Methods.fs" />
+    <Compile Include="DotnetToCue/Class.fs" />
+    <Compile Include="DotnetToCue/Enum.fs" />
+    <Compile Include="DotnetToCue/Type.fs" />
+
+    <Compile Include="DotnetToCue/Module.fs" />
+
+    <Compile Include="DotnetToCue/Config.fs" />
+    <Compile Include="DotnetToCue/Register.fs" /> 
+    <Compile Include="DotnetToCue/Assembly.fs" />
+
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="5.0.1" />
+  </ItemGroup>
+</Project>

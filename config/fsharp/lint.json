@@ -1,0 +1,12 @@
+{
+    "indentation": {
+        "enabled": true
+    },
+    "noPartialFunctions": {
+        "enabled": true,
+        "config": {
+          "allowedPartials": [],
+          "additionalPartials": []
+        }
+    }
+}
