@@ -161,13 +161,8 @@ type File =
                 this.Filename
 
         let target = System.IO.Path.Join(rootDir, filename)
-
-        let pathSep = target.Split "/"
-
-        let dir =
-            String.Join("/", pathSep.[..pathSep.Length - 2])
-
-        ignore (IO.Directory.CreateDirectory(dir))
+        let dir = (Path.GetDirectoryName target)
+        ignore (Directory.CreateDirectory(dir))
         System.IO.File.WriteAllText(target, content)
 
 let IdentEmpty = Ident.New("")

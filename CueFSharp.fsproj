@@ -3,8 +3,9 @@
     <PackageId>CueFSharp</PackageId>
     <Authors>orpharion</Authors>
     <PackageTags>CUE F# ffi</PackageTags>
+    <Description>CUE source generation from .NET types and assemblies</Description>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>CueFSharp</RootNamespace>
