@@ -1,11 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <PackageId>CueFSharp</PackageId>
+    <Authors>orpharion</Authors>
+    <PackageTags>CUE F# ffi</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Version>0.1.0</Version>
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>CueFSharp</RootNamespace>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RepositoryUrl>https://github.com/orpharion/CueFSharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <!-- CUE -->
@@ -39,6 +45,7 @@
     <Compile Include="Library.fs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="LICENSE" Pack="true" PackagePath=""/>
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="5.0.1" />
   </ItemGroup>
 </Project>
