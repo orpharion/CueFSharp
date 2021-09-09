@@ -55,7 +55,7 @@ let tryReference (d: (Assembly -> string)) (t: Type) =
 
 
         let selectors =
-            let e = t.FullName.[t.Namespace.Length + 1..]
+            let e = t.FullName.[t.Namespace.Length + 1..].Replace("[]", "Array") // Hacky fix for C# Array types
 
             match e.Length with
             | 0 -> Some(Array.empty)

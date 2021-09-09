@@ -24,7 +24,7 @@ let NewExpr (reg: IRegistry) (t: ContextualType)  =
             // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/reference-types
             // do any other reference types need consideration?
             if t.Type.IsClass then
-                Class.Class reg t :> IExpr 
+                Class.Class reg t
             elif t.Type.IsValueType then
                 // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types
                 if isEnum t.Type then

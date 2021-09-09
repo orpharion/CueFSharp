@@ -24,9 +24,10 @@
     <Compile Include="DotnetToCue/Util.fs" />
 
     <!--     Basic types -->
-    <Compile Include="DotnetToCue/Ast.fs" />
-    <Compile Include="DotnetToCue/IRegister.fs" /> 
-    <Compile Include="DotnetToCue/Reference.fs" />
+    <Compile Include="DotnetToCue/Ast.fs" /> 
+    <Compile Include="DotnetToCue/Reference.fs" /> 
+    <Compile Include="DotnetToCue/Config.fs" /> 
+    <Compile Include="DotnetToCue/IRegister.fs" />
     <Compile Include="DotnetToCue/Scalars.fs" />
     <Compile Include="DotnetToCue/Vectors.fs" />
 
@@ -39,7 +40,6 @@
 
     <Compile Include="DotnetToCue/Module.fs" />
 
-    <Compile Include="DotnetToCue/Config.fs" />
     <Compile Include="DotnetToCue/Register.fs" /> 
     <Compile Include="DotnetToCue/Assembly.fs" />
 

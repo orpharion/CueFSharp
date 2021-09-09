@@ -207,7 +207,7 @@ type StructLit =
       Comments: OComments }
     interface IExpr with
         member this.Print(level: int) =
-            $"{{{join level (this.Elts |> Array.map (fun c -> c :> INode))}}}"
+            $"{{{join level (this.Elts |> Array.map (fun c -> c :> INode))}{sep(level - 1)}}}"
 
         member this.Comments = this.Comments
         member this.DeclNode = ()

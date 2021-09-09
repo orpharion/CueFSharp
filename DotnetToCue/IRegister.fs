@@ -1,7 +1,10 @@
 module CueFSharp.DotnetToCue.IRegister
 
 open System
+open System.Collections
+open System.Reflection
 open CueFSharp.Cue.Ast
+open CueFSharp.DotnetToCue
 open Ast
 
 // For composite literals, there is no path to return. 
@@ -19,7 +22,9 @@ type ContextualType =
         Context: AbsoluteValueIdent
     }
 
-type IRegistry = 
+type IRegistry =
+   abstract member Config: Config.Config
+   abstract member GetExprFromAttribute: Generic.IEnumerable<CustomAttributeData> -> Option<Ident>
    abstract member TypeContextual: ContextualType -> IExpr
    abstract member Type: Type -> IExpr
    abstract member AddReference: string -> AbsoluteValueIdent -> unit
