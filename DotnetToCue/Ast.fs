@@ -113,7 +113,7 @@ type ImportDecl =
             | _ ->
                 "import ("
                 + (join level (this.Specs.Values |> Seq.cast |> Seq.map ToINode))
-                + ")"
+                + "\n)\n"
 
         member this.Comments = this.Comments
         member this.DeclNode = ()

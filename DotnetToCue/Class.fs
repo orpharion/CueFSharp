@@ -60,22 +60,29 @@ let Class (reg: IRegistry) (t: ContextualType) =
         (Properties reg (t.Type.GetProperties()) t.Context)
         |> Array.map ToIDecl
 
-    let methodInfos = filter (t.Type)
-
     let methodDecls =
-        Methods reg methodInfos t.Context |> Array.map ToIDecl
+        match reg.Config.Cue.IgnoreClassMethods with
+        | true -> Methods reg (filter t.Type) t.Context |> Array.map ToIDecl
+        | false -> [||]
 
-    { BinaryExpr.X =
-          { StructLit.Elts =
-                Array.concat (
-                    seq {
-                        [| attrDecl |]
-                        fieldDecls
-                        propDecls
-                        methodDecls
-                    }
-                )
-            Comments = None }
-      Op = OR
-      Y = BasicLit.NewNull()
-      Comments = None }
+    let classExpr = {
+        StructLit.Elts =
+            Array.concat (
+                seq {
+                    [| attrDecl |]
+                    fieldDecls
+                    propDecls
+                    methodDecls
+                }
+            )
+        Comments = None
+    }
+    
+    match reg.Config.Cue.ReferenceTypesAsNullable with
+    | true -> ({
+            BinaryExpr.X = classExpr
+            Op = OR
+            Y = BasicLit.NewNull()
+            Comments = None
+        } :> IExpr)
+    | false -> (classExpr :> IExpr)

@@ -10,6 +10,18 @@ let isPrimitive (t: Type) =
     t.IsPrimitive
     || Array.contains t.FullName [| "System.String"; "System.Void"|]
 
+let isNullable (t: Type) =
+    match t with
+    | null -> false
+    | _ ->
+        match t.GenericTypeArguments with
+        | null -> false
+        | _ -> not t.IsGenericTypeDefinition && t.GenericTypeArguments.Length > 0 && t.Name.Contains("Nullable")
+    
+let unwrapNullable (t: Type) =
+    match isNullable t with
+    | true -> t.GenericTypeArguments.[0]
+    | false -> t
 
 type Literal =
     | Bool of bool

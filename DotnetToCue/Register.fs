@@ -10,7 +10,6 @@ open System.IO
 open System.Reflection
 open System.Collections.Generic
 
-
 open CueFSharp.Cue.Ast
 open Ast
 open IRegister
@@ -18,6 +17,10 @@ open Type
 open Scalars
 open Module
 open Config
+
+type CueExpression (expr: Object) =
+    inherit System.Attribute()
+    member this.Expr = cast(expr)(expr.GetType())
 
 let FindOrNew (key: 'K) (dict: Dictionary<'K, 'V>) (builder: unit -> 'V) =
     let (found, valueFound) = dict.TryGetValue key
@@ -98,11 +101,25 @@ type Registry =
     member r.AddExpr (ref: AbsoluteValueIdent) (expr: IExpr) =
         let file = r.FindFile ref
         file.Decls.Add(ref.ToLocalExpr expr)
+        
+    member r.GetExprFromAttribute(attrs: IEnumerable<CustomAttributeData>) =
+        let name = typeof<CueExpression>.FullName
+        attrs
+        |> Seq.tryFind(fun attr -> attr.AttributeType.FullName = name)
+        |> fun attr ->
+            match attr with
+            | Some a ->
+                match Seq.tryHead a.ConstructorArguments with
+                | Some arg -> Some(arg.Value :?> string |> Ident.New)
+                | None -> None
+            | None -> None
 
     member r.TypeContextual(t: ContextualType) =
         // no need to add builtin primitive identities, so always by-value.
         if isPrimitive t.Type then
             Kind t.Type
+        else if isNullable t.Type && isPrimitive t.Type then
+            Kind (unwrapNullable t.Type)
         else
             let defReference =
                 match r.TryFindReference t.Type with
@@ -113,10 +130,15 @@ type Registry =
                     // The type is referenceable, so register it in its own defining context and parse it.
                     | Some dRef ->
                         r.AddReference t.Type.FullName dRef
-
-                        { ContextualType.Type = t.Type
-                          Context = dRef }
-                        |> NewExpr r
+                        match r.GetExprFromAttribute t.Type.CustomAttributes with
+                        | Some expr ->
+                            expr :> IExpr
+                        | None ->
+                            {
+                              ContextualType.Type = t.Type
+                              Context = dRef
+                            }
+                            |> NewExpr r
                         |> r.AddExpr dRef
 
                         Some(dRef)
@@ -169,6 +191,8 @@ type Registry =
 
 
     interface IRegistry with
+        member r.Config = r.Config
+        member r.GetExprFromAttribute t = r.GetExprFromAttribute t
         member r.Type t = r.Type t
         member r.TypeContextual t = r.TypeContextual t
         member r.AddReference fullName ref = r.AddReference fullName ref
