@@ -24,8 +24,9 @@ type ContextualType =
 
 type IRegistry =
    abstract member Config: Config.Config
-   abstract member GetExprFromAttribute: Generic.IEnumerable<CustomAttributeData> -> Option<Ident>
+   abstract member GetExprFromAlias: MemberInfo -> Option<IExpr>
    abstract member TypeContextual: ContextualType -> IExpr
    abstract member Type: Type -> IExpr
    abstract member AddReference: string -> AbsoluteValueIdent -> unit
    abstract member AddExpr: AbsoluteValueIdent -> IExpr -> unit
+   abstract member AddTypeAlias: string -> string -> unit

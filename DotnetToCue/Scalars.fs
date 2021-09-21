@@ -16,11 +16,12 @@ let isNullable (t: Type) =
     | _ ->
         match t.GenericTypeArguments with
         | null -> false
-        | _ -> not t.IsGenericTypeDefinition && t.GenericTypeArguments.Length > 0 && t.Name.Contains("Nullable")
+        | _ -> not (t.IsGenericTypeDefinition && t.GenericTypeArguments.Length > 0 && t.Name.Contains("Nullable"))
+               && not (t.CustomAttributes |> Seq.tryFind(fun a -> a.AttributeType.FullName.Contains("System.Runtime.CompilerServices.Nullable")) |> Option.isSome)
     
 let unwrapNullable (t: Type) =
     match isNullable t with
-    | true -> t.GenericTypeArguments.[0]
+    | true -> t.GenericTypeArguments |> Seq.tryHead |> Option.defaultValue t
     | false -> t
 
 type Literal =
@@ -42,7 +43,7 @@ let literal value =
 let Kinds =
     Map(
         [ "System.Boolean", Ident.New "bool" :> IExpr
-          "System.Double", Ident.New "float" :> IExpr
+          "System.Double", Ident.New "number" :> IExpr
           "System.Int32", Ident.New "int32" :> IExpr
           "System.String", Ident.New "string"  :> IExpr
           "System.Void", BasicLit.NewNull() :> IExpr]

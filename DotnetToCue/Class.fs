@@ -62,8 +62,8 @@ let Class (reg: IRegistry) (t: ContextualType) =
 
     let methodDecls =
         match reg.Config.Cue.IgnoreClassMethods with
-        | true -> Methods reg (filter t.Type) t.Context |> Array.map ToIDecl
-        | false -> [||]
+        | false -> Methods reg (filter t.Type) t.Context |> Array.map ToIDecl
+        | true -> [||]
 
     let classExpr = {
         StructLit.Elts =

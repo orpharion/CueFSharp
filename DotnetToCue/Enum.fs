@@ -14,15 +14,21 @@ open Scalars
 let Enum (reg: IRegistry) (t: ContextualType) =
     // todo(ado): bases
     // todo(ado): check references updated correctly.
-    let cast o = cast o (t.Type.GetEnumUnderlyingType())
-
+    let stringValues = true
+    
+    let castx (f: FieldInfo) =
+        match stringValues with
+        | true -> cast f.Name typeof<string>
+        | false -> cast (f.GetRawConstantValue()) (t.Type.GetEnumUnderlyingType())
+                         
+    
     // todo this is black magic here.
     let literals =
         Array.filter (fun (f: FieldInfo) -> f.IsLiteral) (t.Type.GetFields())
 
     let fieldDecls =
         literals
-        |> Array.map (fun (f: FieldInfo) -> Field.New f.Name (cast (f.GetRawConstantValue())) :> IDecl)
+        |> Array.map (fun (f: FieldInfo) -> Field.New f.Name (castx f) :> IDecl)
 
     let enumMap =
         { StructLit.Elts = fieldDecls

@@ -37,22 +37,30 @@ let FindOrNew (key: 'K) (dict: Dictionary<'K, 'V>) (builder: unit -> 'V) =
 type DotnetTypeFullName = string
 type References = Dictionary<DotnetTypeFullName, AbsoluteValueIdent>
 
+type Aliases = Dictionary<DotnetTypeFullName, IExpr>
+
 // The registry records and caches
 type Registry =
-    { Modules: Modules
+    {
+      Modules: Modules
       References: References
-      Config: Config }
+      Config: Config
+      Aliases: Aliases
+    }
 
     member private r.TypeReferencer =
         Reference.tryReference r.Config.Cue.Module.DomainNamer
 
     static member New(cfg: Option<Config>) =
-        { Modules = new Modules()
-          References = new References()
-          Config =
+        {
+            Modules = Modules()
+            References = References()
+            Aliases = Aliases()
+            Config =
               match cfg with
               | Some c -> c
-              | None -> Config() }
+              | None -> Config()
+        }
 
     member private r.TryFindReference(t: Type) =
         match t.FullName with
@@ -62,7 +70,8 @@ type Registry =
             if found then Some(value) else None
 
 
-    member private r.AddReference (fullName: string) (ref: AbsoluteValueIdent) = r.References.Add(fullName, ref)
+    member private r.AddReference (fullName: string) (ref: AbsoluteValueIdent) =
+        r.References.Add(fullName, ref)
 
 
     member private r.FindFile(ref: AbsoluteValueIdent) =
@@ -102,17 +111,21 @@ type Registry =
         let file = r.FindFile ref
         file.Decls.Add(ref.ToLocalExpr expr)
         
-    member r.GetExprFromAttribute(attrs: IEnumerable<CustomAttributeData>) =
+    member r.GetExprFromAlias(m: MemberInfo) =
         let name = typeof<CueExpression>.FullName
-        attrs
+        
+        m.GetCustomAttributesData()
         |> Seq.tryFind(fun attr -> attr.AttributeType.FullName = name)
-        |> fun attr ->
-            match attr with
+        |> function
             | Some a ->
                 match Seq.tryHead a.ConstructorArguments with
-                | Some arg -> Some(arg.Value :?> string |> Ident.New)
-                | None -> None
-            | None -> None
+                | Some arg -> Some(arg.Value :?> string |> Ident.New :> IExpr)
+                | _ -> None
+            | None ->
+                match m :? Type && r.Aliases.ContainsKey (m :?> Type).FullName with
+                | true -> Some(r.Aliases.GetValueOrDefault((m :?> Type).FullName))
+                | false -> None
+
 
     member r.TypeContextual(t: ContextualType) =
         // no need to add builtin primitive identities, so always by-value.
@@ -130,9 +143,8 @@ type Registry =
                     // The type is referenceable, so register it in its own defining context and parse it.
                     | Some dRef ->
                         r.AddReference t.Type.FullName dRef
-                        match r.GetExprFromAttribute t.Type.CustomAttributes with
-                        | Some expr ->
-                            expr :> IExpr
+                        match r.GetExprFromAlias t.Type with
+                        | Some expr -> expr
                         | None ->
                             {
                               ContextualType.Type = t.Type
@@ -150,13 +162,22 @@ type Registry =
                 let file = r.FindFile t.Context
                 // Get the identifer and import relative to the referenced context.
                 let (ident, import) = dRef.ToIdentRelativeTo t.Context
-
+                
                 // Add the import, if necessary
                 match import with
-                | Some i -> ignore (file.Preamble.ImportDecl.Specs.TryAdd(i.Path.Value, i))
-                | None -> ()
-
-                ident
+                | Some i ->
+                        file.Preamble.ImportDecl.Specs
+                        |> Seq.tryFind(fun spec -> spec.Value.Name.Name = i.Name.Name && spec.Key <> i.Path.Value)
+                        |> function
+                            | Some _ ->
+                                let renamed = { i.Name with Name = $"_{i.Name.Name}" }
+                                ignore(file.Preamble.ImportDecl.Specs.TryAdd(i.Path.Value, { i with Name = renamed }))
+                                { (ident :?> SelectorExpr) with X = renamed } :> IExpr
+                            | None ->
+                                ignore (file.Preamble.ImportDecl.Specs.TryAdd(i.Path.Value, i))
+                                ident
+                | None ->
+                    ident 
             // Return the expression itself.
             | None -> NewExpr r t
     // Add type value in appropriate source file
@@ -189,11 +210,14 @@ type Registry =
                 for KeyValue (_, (file: File)) in pkg.Files do
                     file.Write(mdlDir) r.Config.Write.RootModule    
 
+    member r.AddTypeAlias (typeName: string) (expr: string) =
+        r.Aliases.Add(typeName, expr |> Ident.New)
 
     interface IRegistry with
         member r.Config = r.Config
-        member r.GetExprFromAttribute t = r.GetExprFromAttribute t
+        member r.GetExprFromAlias t = r.GetExprFromAlias t
         member r.Type t = r.Type t
         member r.TypeContextual t = r.TypeContextual t
         member r.AddReference fullName ref = r.AddReference fullName ref
         member r.AddExpr ref expr = r.AddExpr ref expr
+        member r.AddTypeAlias typeName expr = r.AddTypeAlias typeName expr

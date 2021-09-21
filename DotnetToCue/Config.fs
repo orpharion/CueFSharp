@@ -17,8 +17,9 @@ type CueModule()=
 
 type Cue() = 
     member val Module = CueModule() with get, set
-    member val IgnoreClassMethods = true with get, set
+    member val IgnoreClassMethods = false with get, set
     member val ReferenceTypesAsNullable = true with get, set
+    member val NullableFieldAsUnion = true with get, set
 
 type Write () = 
     member val RootModule = "" with get, set
