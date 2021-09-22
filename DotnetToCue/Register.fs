@@ -18,7 +18,7 @@ open Scalars
 open Module
 open Config
 
-type CueExpression (expr: Object) =
+type CueExpressionAttribute (expr: Object) =
     inherit System.Attribute()
     member this.Expr = cast(expr)(expr.GetType())
 
@@ -112,10 +112,10 @@ type Registry =
         file.Decls.Add(ref.ToLocalExpr expr)
         
     member r.GetExprFromAlias(m: MemberInfo) =
-        let name = typeof<CueExpression>.FullName
+        let name = typeof<CueExpressionAttribute>.Name
         
         m.GetCustomAttributesData()
-        |> Seq.tryFind(fun attr -> attr.AttributeType.FullName = name)
+        |> Seq.tryFind(fun attr -> attr.AttributeType.Name = name)
         |> function
             | Some a ->
                 match Seq.tryHead a.ConstructorArguments with
